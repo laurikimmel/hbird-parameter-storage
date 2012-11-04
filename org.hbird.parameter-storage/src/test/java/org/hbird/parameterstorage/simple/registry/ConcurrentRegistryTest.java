@@ -1,5 +1,10 @@
 package org.hbird.parameterstorage.simple.registry;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,9 +34,6 @@ import org.hbird.parameterstorage.simple.query.filter.Filters;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
-// TODO - 31.10.2012, kimmell - fix test; can fail sometimes because timing errors
 public class ConcurrentRegistryTest {
 
     private static final String INPUT_FILE = "/RegistryTest.txt";
@@ -73,11 +75,11 @@ public class ConcurrentRegistryTest {
         assertEquals(NUMBER_OF_LINES, lines.size());
         for (int i = 0; i < lines.size(); i++) {
             final String[] tmp = lines.get(i).split(",");
+            final Long ts = timestamp.incrementAndGet();
             execService.submit(new Runnable() {
                 @Override
                 public void run() {
                     invokeCount.incrementAndGet();
-                    final Long ts = timestamp.incrementAndGet();
 
                     try {
                         Thread.sleep(random.nextInt(MAX_DELAY));
@@ -93,10 +95,8 @@ public class ConcurrentRegistryTest {
 //                            System.out.printf("Adding %s with timestamp %s for key %s to series %s%n", value, ts,
 //                                    tmp[0], t);
                             crud.add(ts, value, new CallbackWithValue<ParameterValueInTime<Integer>>() {
-//                            scs.add(ts, value, new CallbackWithValue<ParameterValueInTime<Integer>>() {
                                 @Override
                                 public void onValue(ParameterValueInTime<Integer> t) {
-//                                    System.out.println("ADDED!");
                                     addedCount.incrementAndGet();
                                 }
 
@@ -124,12 +124,8 @@ public class ConcurrentRegistryTest {
 
         Thread.sleep(3 * 1000);
 
-//        System.out.println("*** SHUTDOWN ***");
-
         execService.shutdown();
         execService.awaitTermination(TIME_LIMIT, TimeUnit.SECONDS);
-
-//        System.out.println("*** VERIFY ***");
 
         assertTrue("Not finished in time", execService.isTerminated());
         assertEquals(NUMBER_OF_LINES, invokeCount.get());
@@ -208,5 +204,4 @@ public class ConcurrentRegistryTest {
         }
         return lines;
     }
-
 }

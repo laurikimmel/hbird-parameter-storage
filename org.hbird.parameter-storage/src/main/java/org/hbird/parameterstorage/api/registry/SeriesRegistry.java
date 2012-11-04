@@ -9,4 +9,5 @@ public interface SeriesRegistry<K, T> {
 
     public void remove(K id, CallbackWithValue<ParameterValueSeries<T>> callback);
 
+    public void containsKey(K id, CallbackWithValue<Boolean> callback);
 }

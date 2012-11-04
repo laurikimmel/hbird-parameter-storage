@@ -8,7 +8,6 @@ import org.hbird.parameterstorage.api.ParameterValueSeries;
 import org.hbird.parameterstorage.api.registry.SeriesFactory;
 import org.hbird.parameterstorage.api.registry.SeriesRegistry;
 
-
 public class ConcurrentSeriesRegistry<K, T> implements SeriesRegistry<K, T> {
 
     protected final SeriesFactory<T> factory;
@@ -42,6 +41,16 @@ public class ConcurrentSeriesRegistry<K, T> implements SeriesRegistry<K, T> {
             series = map.remove(id);
         }
         callback.onValue(series);
+    }
+
+    /** @{inheritDoc . */
+    @Override
+    public void containsKey(K id, CallbackWithValue<Boolean> callback) {
+        boolean result;
+        synchronized (map) {
+            result = map.containsKey(id);
+        }
+        callback.onValue(result);
     }
 
     ParameterValueSeries<T> create(K id, SeriesFactory<T> factory, Map<K, ParameterValueSeries<T>> map) {

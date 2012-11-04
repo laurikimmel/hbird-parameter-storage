@@ -30,7 +30,7 @@ public class SyncSeriesRegistry<K, T> {
         SimpleCallbackWithValue<ParameterValueSeries<T>> callback = new SimpleCallbackWithValue<ParameterValueSeries<T>>();
         registry.getOrCreate(id, callback);
         SimpleCallbackWithValue.verifyCallbackException(callback,
-                String.format("Failed to get ParameterValueSeries for id: %s", id));
+                        String.format("Failed to get ParameterValueSeries for id: %s", id));
         return callback.getValue();
     }
 
@@ -38,7 +38,15 @@ public class SyncSeriesRegistry<K, T> {
         SimpleCallbackWithValue<ParameterValueSeries<T>> callback = new SimpleCallbackWithValue<ParameterValueSeries<T>>();
         registry.remove(id, callback);
         SimpleCallbackWithValue.verifyCallbackException(callback,
-                String.format("Failed to remove ParameterValueSeries for id: %s", id));
+                        String.format("Failed to remove ParameterValueSeries for id: %s", id));
+        return callback.getValue();
+    }
+
+    public Boolean containsKey(K id) throws Exception {
+        SimpleCallbackWithValue<Boolean> callback = new SimpleCallbackWithValue<Boolean>();
+        registry.containsKey(id, callback);
+        SimpleCallbackWithValue.verifyCallbackException(callback,
+                        String.format("Failed to check exitence of ParameterValueSeries for id: %s", id));
         return callback.getValue();
     }
 }

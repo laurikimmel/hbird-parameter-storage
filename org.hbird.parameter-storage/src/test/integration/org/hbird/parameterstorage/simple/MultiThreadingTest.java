@@ -1,4 +1,4 @@
-package net.mati.parameterstorage.simple;
+package org.hbird.parameterstorage.simple;
 
 import java.util.ArrayList;
 import java.util.Collections;

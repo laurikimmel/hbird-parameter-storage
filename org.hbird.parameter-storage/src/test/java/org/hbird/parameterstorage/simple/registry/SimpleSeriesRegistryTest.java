@@ -1,23 +1,24 @@
 package org.hbird.parameterstorage.simple.registry;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+
 import java.util.HashMap;
 import java.util.Map;
-
 
 import org.hbird.parameterstorage.api.CallbackWithValue;
 import org.hbird.parameterstorage.api.ParameterValueSeries;
 import org.hbird.parameterstorage.api.registry.SeriesFactory;
-import org.hbird.parameterstorage.simple.registry.SimpleSeriesRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.junit.Assert.*;
-
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SimpleSeriesRegistryTest {
@@ -38,6 +39,9 @@ public class SimpleSeriesRegistryTest {
     private CallbackWithValue<ParameterValueSeries<Object>> callback;
 
     @Mock
+    private CallbackWithValue<Boolean> booleanCallback;
+
+    @Mock
     private Map<String, ParameterValueSeries<Object>> map;
 
     private InOrder inOrder;
@@ -52,7 +56,7 @@ public class SimpleSeriesRegistryTest {
     public void setUp() throws Exception {
         registry = new SimpleSeriesRegistry<String, Object>(factory);
         when(factory.create()).thenReturn(s1, s2);
-        inOrder = inOrder(factory, s1, s2, callback, map);
+        inOrder = inOrder(factory, s1, s2, callback, map, booleanCallback);
     }
 
     /**
@@ -142,5 +146,24 @@ public class SimpleSeriesRegistryTest {
         assertEquals(0, map2.size());
         assertEquals(HashMap.class, map1.getClass());
         assertEquals(HashMap.class, map2.getClass());
+    }
+
+    /**
+     * Test method for {@link org.hbird.parameterstorage.simple.registry.SimpleSeriesRegistry#createRegistry()} .
+     */
+    @Test
+    public void testContainsKey() {
+        registry.containsKey(ID_1, booleanCallback);
+        registry.containsKey(ID_2, booleanCallback);
+        registry.getOrCreate(ID_1, callback);
+        registry.containsKey(ID_1, booleanCallback);
+        registry.containsKey(ID_2, booleanCallback);
+
+        inOrder.verify(booleanCallback, times(2)).onValue(Boolean.FALSE);
+        inOrder.verify(factory, times(1)).create();
+        inOrder.verify(callback, times(1)).onValue(s1);
+        inOrder.verify(booleanCallback, times(1)).onValue(Boolean.TRUE);
+        inOrder.verify(booleanCallback, times(1)).onValue(Boolean.FALSE);
+        inOrder.verifyNoMoreInteractions();
     }
 }

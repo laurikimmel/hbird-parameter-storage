@@ -6,7 +6,6 @@ import org.hbird.parameterstorage.api.CallbackWithValue;
 import org.hbird.parameterstorage.api.ParameterValueSeries;
 import org.hbird.parameterstorage.api.registry.SeriesRegistry;
 
-
 public class AsyncSeriesRegistry<K, T> implements SeriesRegistry<K, T> {
 
     protected final SeriesRegistry<K, T> registry;
@@ -35,8 +34,14 @@ public class AsyncSeriesRegistry<K, T> implements SeriesRegistry<K, T> {
         execService.submit(createRemoveTask(registry, id, callback));
     }
 
+    /** @{inheritDoc . */
+    @Override
+    public void containsKey(K id, CallbackWithValue<Boolean> callback) {
+        execService.submit(createContainsKeyTask(registry, id, callback));
+    }
+
     protected Runnable createGetOrCreateTask(final SeriesRegistry<K, T> registry, final K id,
-            final CallbackWithValue<ParameterValueSeries<T>> callback) {
+                    final CallbackWithValue<ParameterValueSeries<T>> callback) {
         return new Runnable() {
             @Override
             public void run() {
@@ -46,11 +51,21 @@ public class AsyncSeriesRegistry<K, T> implements SeriesRegistry<K, T> {
     }
 
     protected Runnable createRemoveTask(final SeriesRegistry<K, T> registry, final K id,
-            final CallbackWithValue<ParameterValueSeries<T>> callback) {
+                    final CallbackWithValue<ParameterValueSeries<T>> callback) {
         return new Runnable() {
             @Override
             public void run() {
                 registry.remove(id, callback);
+            }
+        };
+    }
+
+    protected Runnable createContainsKeyTask(final SeriesRegistry<K, T> registry, final K id,
+                    final CallbackWithValue<Boolean> callback) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                registry.containsKey(id, callback);
             }
         };
     }
